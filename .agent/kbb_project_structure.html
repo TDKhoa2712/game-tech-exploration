@@ -1,0 +1,566 @@
+
+<style>
+  body { margin: 0; font-family: var(--font-sans); }
+  .wrap { padding: 16px 0; }
+  .tree { font-size: 13px; line-height: 1.7; color: var(--color-text-primary); }
+  .tree ul { list-style: none; margin: 0; padding-left: 20px; }
+  .tree > ul { padding-left: 0; }
+  .tree li { position: relative; }
+  .tree li::before {
+    content: "";
+    position: absolute;
+    left: -14px; top: 0; bottom: 0;
+    border-left: 1px solid var(--color-border-tertiary);
+  }
+  .tree li:last-child::before { height: 13px; }
+  .tree li::after {
+    content: "";
+    position: absolute;
+    left: -14px; top: 13px;
+    width: 10px; height: 1px;
+    background: var(--color-border-tertiary);
+  }
+  .tree > ul > li::before, .tree > ul > li::after { display: none; }
+  .dir { color: var(--color-text-primary); font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+  .dir:hover { color: var(--color-text-info); }
+  .file { color: var(--color-text-secondary); }
+  .dart { color: #3B8BD4; }
+  .yaml { color: #1D9E75; }
+  .json { color: #BA7517; }
+  .md { color: #7F77DD; }
+  .badge {
+    display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px;
+    margin-left: 6px; font-weight: 500; vertical-align: middle;
+  }
+  .b-phase1 { background: var(--color-background-success); color: var(--color-text-success); }
+  .b-phase2 { background: var(--color-background-info); color: var(--color-text-info); }
+  .b-phase3 { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .b-core { background: var(--color-background-danger); color: var(--color-text-danger); }
+  .section-header {
+    font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--color-text-tertiary); padding: 10px 0 4px;
+  }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--color-text-secondary); }
+  .collapsed > ul { display: none; }
+  .icon { font-size: 12px; user-select: none; }
+  .comment { color: var(--color-text-tertiary); font-style: italic; font-size: 11px; margin-left: 6px; }
+  .tabs { display: flex; gap: 2px; margin-bottom: 12px; }
+  .tab { padding: 6px 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-tertiary);
+    font-size: 12px; cursor: pointer; color: var(--color-text-secondary); background: transparent; font-family: var(--font-sans); }
+  .tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-secondary); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+</style>
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('tree')">Cấu trúc thư mục</button>
+    <button class="tab" onclick="switchTab('layers')">Kiến trúc theo layer</button>
+    <button class="tab" onclick="switchTab('phase')">Theo Phase</button>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="badge b-core">core</span>Bắt buộc ngay</span>
+    <span class="legend-item"><span class="badge b-phase1">P1</span>Phase 1 MVP</span>
+    <span class="legend-item"><span class="badge b-phase2">P2</span>Phase 2 Alpha</span>
+    <span class="legend-item"><span class="badge b-phase3">P3</span>Phase 3 Beta/Release</span>
+  </div>
+
+  <!-- TREE VIEW -->
+  <div id="panel-tree" class="panel active">
+    <div class="tree">
+      <ul>
+        <li>
+          <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>keo_bua_bao/</span>
+          <ul>
+            <!-- Root files -->
+            <li><span class="file yaml">pubspec.yaml</span><span class="comment">— dependencies: flame, riverpod, hive, flame_audio, rive, go_router, i18n</span></li>
+            <li><span class="file dart">main.dart</span><span class="comment">— entry point, ProviderScope, ThemeMode init</span></li>
+            <li><span class="file dart">app.dart</span><span class="comment">— MaterialApp.router, GoRouter setup, Light/Dark theme</span></li>
+            <li><span class="file yaml">.github/workflows/ci.yml</span><span class="comment">— GitHub Actions: test + build APK/IPA</span><span class="badge b-phase3">P3</span></li>
+            <li><span class="file json">analysis_options.yaml</span></li>
+
+            <!-- lib/ -->
+            <li>
+              <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>lib/</span>
+              <ul>
+                <!-- core -->
+                <li>
+                  <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>core/<span class="badge b-core">core</span></span>
+                  <ul>
+                    <li><span class="file dart">constants.dart</span><span class="comment">— HP_START=100, TIMER_SECONDS=5, damage configs</span></li>
+                    <li><span class="file dart">theme.dart</span><span class="comment">— AppTheme light/dark, color tokens</span></li>
+                    <li><span class="file dart">router.dart</span><span class="comment">— GoRouter: tất cả routes của app</span></li>
+                    <li><span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>errors/</span>
+                      <ul>
+                        <li><span class="file dart">app_exception.dart</span></li>
+                        <li><span class="file dart">failure.dart</span></li>
+                      </ul>
+                    </li>
+                    <li><span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>utils/</span>
+                      <ul>
+                        <li><span class="file dart">extensions.dart</span><span class="comment">— String, List ext</span></li>
+                        <li><span class="file dart">logger.dart</span></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+
+                <!-- features/ -->
+                <li>
+                  <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>features/<span class="badge b-core">core</span></span>
+                  <ul>
+
+                    <!-- game -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>game/<span class="badge b-phase1">P1</span></span>
+                      <ul>
+                        <li>
+                          <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>domain/</span>
+                          <ul>
+                            <li><span class="file dart">models/gesture.dart</span><span class="comment">— enum Gesture { rock, paper, scissors }</span></li>
+                            <li><span class="file dart">models/item.dart</span><span class="comment">— ItemType { attack, defense, trap }, ItemEffect</span></li>
+                            <li><span class="file dart">models/game_state.dart</span><span class="comment">— HP, round, items, phase, result</span></li>
+                            <li><span class="file dart">models/player.dart</span><span class="comment">— Player local model</span></li>
+                            <li><span class="file dart">services/rps_engine.dart</span><span class="comment">— logic thắng/thua/hòa thuần Dart</span></li>
+                            <li><span class="file dart">services/item_service.dart</span><span class="comment">— damage calc, trap trigger, pick validate</span></li>
+                            <li><span class="file dart">services/level_service.dart</span><span class="comment">— level scaling, số ô vật phẩm theo level</span></li>
+                          </ul>
+                        </li>
+                        <li>
+                          <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>presentation/</span>
+                          <ul>
+                            <li>
+                              <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>providers/</span>
+                              <ul>
+                                <li><span class="file dart">game_provider.dart</span><span class="comment">— GameStateNotifier (Riverpod)</span></li>
+                                <li><span class="file dart">timer_provider.dart</span><span class="comment">— countdown 3–5s per round</span></li>
+                              </ul>
+                            </li>
+                            <li>
+                              <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>screens/</span>
+                              <ul>
+                                <li><span class="file dart">game_screen.dart</span><span class="comment">— FlameGameWidget embedded trong Flutter</span></li>
+                                <li><span class="file dart">result_screen.dart</span><span class="comment">— màn kết quả trận</span></li>
+                              </ul>
+                            </li>
+                            <li>
+                              <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>widgets/</span>
+                              <ul>
+                                <li><span class="file dart">hp_bar_widget.dart</span><span class="comment">— thanh máu 2 player</span></li>
+                                <li><span class="file dart">gesture_picker_widget.dart</span><span class="comment">— 3 nút Kéo/Búa/Bao + timer</span></li>
+                                <li><span class="file dart">item_board_widget.dart</span><span class="comment">— bàn N ô vật phẩm ẩn</span></li>
+                                <li><span class="file dart">round_history_widget.dart</span><span class="comment">— N lượt gần nhất</span><span class="badge b-phase2">P2</span></li>
+                                <li><span class="file dart">wrong_pick_alert_widget.dart</span><span class="comment">— cảnh báo pick nhầm</span><span class="badge b-phase2">P2</span></li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </li>
+                        <li>
+                          <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>flame/</span>
+                          <ul>
+                            <li><span class="file dart">kbb_game.dart</span><span class="comment">— FlameGame chính (extends FlameGame)</span></li>
+                            <li><span class="file dart">components/item_cell_component.dart</span><span class="comment">— ô vật phẩm flip animation</span></li>
+                            <li><span class="file dart">components/character_component.dart</span><span class="comment">— nhân vật + Rive animation</span><span class="badge b-phase2">P2</span></li>
+                            <li><span class="file dart">components/slapstick_component.dart</span><span class="comment">— hiệu ứng Trap/sỉ nhục</span><span class="badge b-phase2">P2</span></li>
+                            <li><span class="file dart">components/reveal_component.dart</span><span class="comment">— reveal đồng thời kết quả RPS</span></li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+
+                    <!-- auth -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>auth/<span class="badge b-phase3">P3</span></span>
+                      <ul>
+                        <li><span class="file dart">domain/auth_repository.dart</span></li>
+                        <li><span class="file dart">data/firebase_auth_service.dart</span><span class="comment">— Google/Apple Sign-In</span></li>
+                        <li><span class="file dart">presentation/providers/auth_provider.dart</span></li>
+                        <li><span class="file dart">presentation/screens/login_screen.dart</span></li>
+                      </ul>
+                    </li>
+
+                    <!-- profile -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>profile/<span class="badge b-phase2">P2</span></span>
+                      <ul>
+                        <li><span class="file dart">domain/player_stats.dart</span><span class="comment">— wins, losses, XP, currency</span></li>
+                        <li><span class="file dart">data/profile_hive_repository.dart</span><span class="comment">— local Hive (P1-P2)</span></li>
+                        <li><span class="file dart">data/profile_remote_repository.dart</span><span class="comment">— Firestore sync</span><span class="badge b-phase3">P3</span></li>
+                        <li><span class="file dart">presentation/providers/profile_provider.dart</span></li>
+                        <li><span class="file dart">presentation/screens/profile_screen.dart</span></li>
+                      </ul>
+                    </li>
+
+                    <!-- character -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>character/<span class="badge b-phase2">P2</span></span>
+                      <ul>
+                        <li><span class="file dart">domain/character.dart</span><span class="comment">— tên, xuất thân dân gian, màu sắc, unlock condition</span></li>
+                        <li><span class="file dart">presentation/screens/character_select_screen.dart</span></li>
+                        <li><span class="file dart">presentation/providers/character_provider.dart</span></li>
+                      </ul>
+                    </li>
+
+                    <!-- shop -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>shop/<span class="badge b-phase2">P2</span></span>
+                      <ul>
+                        <li><span class="file dart">domain/shop_item.dart</span><span class="comment">— cosmetic, emote, sticker (không pay-to-win)</span></li>
+                        <li><span class="file dart">data/shop_hive_repository.dart</span></li>
+                        <li><span class="file dart">presentation/screens/shop_screen.dart</span></li>
+                        <li><span class="file dart">presentation/providers/shop_provider.dart</span></li>
+                      </ul>
+                    </li>
+
+                    <!-- pvp -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>pvp/<span class="badge b-phase3">P3</span></span>
+                      <ul>
+                        <li><span class="file dart">domain/room.dart</span><span class="comment">— Room model, RoomState</span></li>
+                        <li><span class="file dart">data/realtime_service.dart</span><span class="comment">— Firebase Realtime / WebSocket</span></li>
+                        <li><span class="file dart">data/matchmaking_service.dart</span><span class="comment">— MMR queue</span></li>
+                        <li><span class="file dart">presentation/screens/room_screen.dart</span><span class="comment">— tạo/join phòng, mã mời</span></li>
+                        <li><span class="file dart">presentation/screens/pvp_game_screen.dart</span></li>
+                        <li><span class="file dart">presentation/providers/pvp_provider.dart</span></li>
+                      </ul>
+                    </li>
+
+                    <!-- rank -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>rank/<span class="badge b-phase3">P3</span></span>
+                      <ul>
+                        <li><span class="file dart">domain/rank.dart</span><span class="comment">— Bronze→Silver→Gold, MMR</span></li>
+                        <li><span class="file dart">data/rank_repository.dart</span></li>
+                        <li><span class="file dart">presentation/screens/leaderboard_screen.dart</span></li>
+                        <li><span class="file dart">presentation/providers/rank_provider.dart</span></li>
+                      </ul>
+                    </li>
+
+                    <!-- menu / home -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>menu/<span class="badge b-phase1">P1</span></span>
+                      <ul>
+                        <li><span class="file dart">presentation/screens/main_menu_screen.dart</span><span class="comment">— nút Play, Settings, GoRouter nav</span></li>
+                        <li><span class="file dart">presentation/screens/mode_select_screen.dart</span><span class="comment">— PvE/PvP/Room/Rank</span></li>
+                        <li><span class="file dart">presentation/screens/settings_screen.dart</span><span class="comment">— SFX, nhạc, Light/Dark, i18n</span></li>
+                        <li><span class="file dart">presentation/screens/help_screen.dart</span><span class="comment">— luật chơi xem bất kỳ lúc nào</span></li>
+                        <li><span class="file dart">presentation/providers/settings_provider.dart</span><span class="comment">— Hive lưu settings</span></li>
+                      </ul>
+                    </li>
+
+                    <!-- ai -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>ai/<span class="badge b-phase1">P1</span></span>
+                      <ul>
+                        <li><span class="file dart">pve_ai.dart</span><span class="comment">— interface AIStrategy</span></li>
+                        <li><span class="file dart">random_ai.dart</span><span class="comment">— AI random (P1)</span></li>
+                        <li><span class="file dart">heuristic_ai.dart</span><span class="comment">— đọc pattern trung bình (P2)</span><span class="badge b-phase2">P2</span></li>
+                        <li><span class="file dart">adaptive_ai.dart</span><span class="comment">— AI khó, pattern linh hoạt (P2)</span><span class="badge b-phase2">P2</span></li>
+                      </ul>
+                    </li>
+
+                    <!-- tutorial -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>tutorial/<span class="badge b-phase2">P2</span></span>
+                      <ul>
+                        <li><span class="file dart">tutorial_provider.dart</span><span class="comment">— trigger Level 1-3 onboarding</span></li>
+                        <li><span class="file dart">tutorial_overlay_widget.dart</span></li>
+                      </ul>
+                    </li>
+
+                    <!-- social -->
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>social/<span class="badge b-phase3">P3</span></span>
+                      <ul>
+                        <li><span class="file dart">share_service.dart</span><span class="comment">— RepaintBoundary → lưu ảnh kết quả</span></li>
+                        <li><span class="file dart">deep_link_service.dart</span><span class="comment">— Firebase Dynamic Links mời phòng</span></li>
+                        <li><span class="file dart">sticker_service.dart</span><span class="comment">— gửi/nhận sticker chê (thiết kế sẵn)</span></li>
+                      </ul>
+                    </li>
+
+                  </ul>
+                </li>
+
+                <!-- shared -->
+                <li>
+                  <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>shared/<span class="badge b-core">core</span></span>
+                  <ul>
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>widgets/</span>
+                      <ul>
+                        <li><span class="file dart">primary_button.dart</span></li>
+                        <li><span class="file dart">app_scaffold.dart</span></li>
+                        <li><span class="file dart">loading_overlay.dart</span></li>
+                        <li><span class="file dart">error_view.dart</span></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>audio/</span>
+                      <ul>
+                        <li><span class="file dart">audio_manager.dart</span><span class="comment">— flame_audio wrapper: SFX + nhạc nền</span></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>storage/</span>
+                      <ul>
+                        <li><span class="file dart">hive_manager.dart</span><span class="comment">— init Hive, đăng ký adapters</span></li>
+                        <li><span class="file dart">adapters/settings_adapter.dart</span></li>
+                        <li><span class="file dart">adapters/player_stats_adapter.dart</span></li>
+                        <li><span class="file dart">adapters/shop_adapter.dart</span></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>l10n/</span>
+                      <ul>
+                        <li><span class="file">app_vi.arb</span><span class="comment">— Tiếng Việt</span><span class="badge b-phase3">P3</span></li>
+                        <li><span class="file">app_en.arb</span><span class="comment">— English</span><span class="badge b-phase3">P3</span></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+
+              </ul>
+            </li>
+
+            <!-- assets/ -->
+            <li>
+              <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>assets/</span>
+              <ul>
+                <li><span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>audio/</span>
+                  <ul>
+                    <li><span class="file">bgm/</span><span class="comment">— nhạc nền dân gian VN (CC)</span></li>
+                    <li><span class="file">sfx/</span><span class="comment">— thắng/thua/pick/trap</span></li>
+                  </ul>
+                </li>
+                <li><span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>images/</span>
+                  <ul>
+                    <li><span class="file">characters/</span><span class="comment">— sprites nhân vật dân gian VN</span></li>
+                    <li><span class="file">items/</span><span class="comment">— đòn gánh, nón lá, vỏ chuối...</span></li>
+                    <li><span class="file">ui/</span><span class="comment">— icons, buttons, backgrounds</span></li>
+                    <li><span class="file">stickers/</span><span class="comment">— sticker chê thiết kế sẵn</span><span class="badge b-phase2">P2</span></li>
+                  </ul>
+                </li>
+                <li><span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>animations/</span>
+                  <ul>
+                    <li><span class="file">.riv</span><span class="comment">— Rive: idle, win, lose cho mỗi nhân vật</span><span class="badge b-phase2">P2</span></li>
+                  </ul>
+                </li>
+                <li><span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>fonts/</span></li>
+              </ul>
+            </li>
+
+            <!-- test/ -->
+            <li>
+              <span class="dir" onclick="toggle(this)"><i class="ti ti-folder icon"></i>test/</span>
+              <ul>
+                <li><span class="file dart">unit/rps_engine_test.dart</span><span class="comment">— logic thắng/thua/hòa</span><span class="badge b-phase1">P1</span></li>
+                <li><span class="file dart">unit/item_service_test.dart</span><span class="comment">— damage, trap, pick validate</span><span class="badge b-phase1">P1</span></li>
+                <li><span class="file dart">unit/level_service_test.dart</span></li>
+                <li><span class="file dart">unit/ai_test.dart</span><span class="comment">— heuristic/adaptive AI scenarios</span><span class="badge b-phase2">P2</span></li>
+                <li><span class="file dart">widget/hp_bar_test.dart</span></li>
+                <li><span class="file dart">integration/game_flow_test.dart</span><span class="comment">— Menu→PvE→Kết quả→Chơi lại</span><span class="badge b-phase1">P1</span></li>
+              </ul>
+            </li>
+
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- LAYERS VIEW -->
+  <div id="panel-layers" class="panel">
+    <svg width="100%" viewBox="0 0 680 520" role="img">
+      <title>Kiến trúc theo layer của KBB</title>
+      <desc>Sơ đồ 4 layer: Presentation, Domain, Data, External</desc>
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Layer 1: Presentation -->
+      <g class="c-purple">
+        <rect x="20" y="20" width="640" height="90" rx="12" stroke-width="0.5"/>
+        <text class="th" x="36" y="46">Presentation layer</text>
+        <text class="ts" x="36" y="62">Flutter Screens · Widgets · Riverpod Providers</text>
+      </g>
+      <g class="c-purple">
+        <rect x="36" y="72" width="90" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="81" y="90" text-anchor="middle" dominant-baseline="central">Screens</text>
+      </g>
+      <g class="c-purple">
+        <rect x="136" y="72" width="90" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="181" y="90" text-anchor="middle" dominant-baseline="central">Widgets</text>
+      </g>
+      <g class="c-purple">
+        <rect x="236" y="72" width="120" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="296" y="90" text-anchor="middle" dominant-baseline="central">Riverpod Providers</text>
+      </g>
+      <g class="c-purple">
+        <rect x="366" y="72" width="120" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="426" y="90" text-anchor="middle" dominant-baseline="central">Flame Components</text>
+      </g>
+      <g class="c-purple">
+        <rect x="496" y="72" width="100" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="546" y="90" text-anchor="middle" dominant-baseline="central">GoRouter</text>
+      </g>
+
+      <!-- Arrow down -->
+      <line x1="340" y1="112" x2="340" y2="142" class="arr" marker-end="url(#arrow)"/>
+      <line x1="340" y1="142" x2="340" y2="112" class="arr" marker-end="url(#arrow)"/>
+      <text class="ts" x="350" y="131" style="fill:var(--color-text-tertiary)">Providers inject</text>
+
+      <!-- Layer 2: Domain -->
+      <g class="c-teal">
+        <rect x="20" y="148" width="640" height="90" rx="12" stroke-width="0.5"/>
+        <text class="th" x="36" y="174">Domain layer — thuần Dart, không phụ thuộc framework</text>
+      </g>
+      <g class="c-teal">
+        <rect x="36" y="186" width="120" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="96" y="204" text-anchor="middle" dominant-baseline="central">Models (Entities)</text>
+      </g>
+      <g class="c-teal">
+        <rect x="166" y="186" width="120" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="226" y="204" text-anchor="middle" dominant-baseline="central">RPS Engine</text>
+      </g>
+      <g class="c-teal">
+        <rect x="296" y="186" width="120" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="356" y="204" text-anchor="middle" dominant-baseline="central">Item Service</text>
+      </g>
+      <g class="c-teal">
+        <rect x="426" y="186" width="120" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="486" y="204" text-anchor="middle" dominant-baseline="central">Level Service</text>
+      </g>
+      <g class="c-teal">
+        <rect x="556" y="186" width="90" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="601" y="204" text-anchor="middle" dominant-baseline="central">AI Strategies</text>
+      </g>
+
+      <!-- Arrow down -->
+      <line x1="340" y1="240" x2="340" y2="270" class="arr" marker-end="url(#arrow)"/>
+      <line x1="340" y1="270" x2="340" y2="240" class="arr" marker-end="url(#arrow)"/>
+      <text class="ts" x="350" y="260" style="fill:var(--color-text-tertiary)">Repository pattern</text>
+
+      <!-- Layer 3: Data -->
+      <g class="c-amber">
+        <rect x="20" y="276" width="640" height="90" rx="12" stroke-width="0.5"/>
+        <text class="th" x="36" y="302">Data layer</text>
+        <text class="ts" x="36" y="318">Hive local · Firebase/Supabase remote · Audio · Storage</text>
+      </g>
+      <g class="c-amber">
+        <rect x="36" y="312" width="110" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="91" y="330" text-anchor="middle" dominant-baseline="central">Hive Repositories</text>
+      </g>
+      <g class="c-amber">
+        <rect x="156" y="312" width="110" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="211" y="330" text-anchor="middle" dominant-baseline="central">Remote Repos</text>
+      </g>
+      <g class="c-amber">
+        <rect x="276" y="312" width="110" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="331" y="330" text-anchor="middle" dominant-baseline="central">Audio Manager</text>
+      </g>
+      <g class="c-amber">
+        <rect x="396" y="312" width="110" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="451" y="330" text-anchor="middle" dominant-baseline="central">Share Service</text>
+      </g>
+      <g class="c-amber">
+        <rect x="516" y="312" width="110" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="571" y="330" text-anchor="middle" dominant-baseline="central">Deep Link</text>
+      </g>
+
+      <!-- Arrow down -->
+      <line x1="340" y1="368" x2="340" y2="398" class="arr" marker-end="url(#arrow)"/>
+      <text class="ts" x="350" y="388" style="fill:var(--color-text-tertiary)">Calls to</text>
+
+      <!-- Layer 4: External -->
+      <g class="c-coral">
+        <rect x="20" y="404" width="640" height="80" rx="12" stroke-width="0.5"/>
+        <text class="th" x="36" y="430">External / Infrastructure</text>
+      </g>
+      <g class="c-coral">
+        <rect x="36" y="440" width="90" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="81" y="458" text-anchor="middle" dominant-baseline="central">Hive (local)</text>
+      </g>
+      <g class="c-coral">
+        <rect x="136" y="440" width="110" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="191" y="458" text-anchor="middle" dominant-baseline="central">Firebase / Supabase</text>
+      </g>
+      <g class="c-coral">
+        <rect x="256" y="440" width="90" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="301" y="458" text-anchor="middle" dominant-baseline="central">flame_audio</text>
+      </g>
+      <g class="c-coral">
+        <rect x="356" y="440" width="80" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="396" y="458" text-anchor="middle" dominant-baseline="central">Rive</text>
+      </g>
+      <g class="c-coral">
+        <rect x="446" y="440" width="100" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="496" y="458" text-anchor="middle" dominant-baseline="central">WebSocket/RT</text>
+      </g>
+      <g class="c-coral">
+        <rect x="556" y="440" width="90" height="28" rx="6" stroke-width="0.5"/>
+        <text class="ts" x="601" y="458" text-anchor="middle" dominant-baseline="central">GitHub Actions</text>
+      </g>
+
+      <text class="ts" x="340" y="510" text-anchor="middle" style="fill:var(--color-text-tertiary)">Dependency rule: outer layers phụ thuộc vào inner layers, không ngược lại</text>
+    </svg>
+  </div>
+
+  <!-- PHASE VIEW -->
+  <div id="panel-phase" class="panel">
+    <div style="font-size:13px;line-height:1.8;color:var(--color-text-secondary)">
+
+      <div class="section-header">Phase 1 — MVP (Tuần 1–4): Chơi được trận PvE đầu tiên</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="padding:10px 12px;border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);border-left:3px solid #1D9E75">
+          <div style="font-weight:500;font-size:12px;margin-bottom:4px;color:var(--color-text-primary)">Files tạo mới</div>
+          <div style="font-size:11px;color:var(--color-text-secondary)">main.dart · app.dart · core/constants · core/theme · core/router<br>game/domain/gesture · item · game_state · rps_engine · item_service · level_service<br>game/flame/kbb_game · item_cell_component · reveal_component<br>game/presentation/game_screen · result_screen · hp_bar · gesture_picker · item_board<br>game/providers/game_provider · timer_provider<br>menu/main_menu · mode_select · settings_screen · help_screen · settings_provider<br>ai/pve_ai · random_ai<br>shared/audio_manager · hive_manager<br>test/unit/rps_engine_test · item_service_test · integration/game_flow_test</div>
+        </div>
+        <div style="padding:10px 12px;border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);border-left:3px solid #1D9E75">
+          <div style="font-weight:500;font-size:12px;margin-bottom:4px;color:var(--color-text-primary)">Mục tiêu kiểm chứng</div>
+          <div style="font-size:11px;color:var(--color-text-secondary)">✓ Core loop: Kéo/Búa/Bao + HP 100 + 2 ô vật phẩm<br>✓ PvE với AI random<br>✓ Vòng lặp đầy đủ: Menu → PvE → Kết quả → Chơi lại<br>✓ Flame GameWidget nhúng vào Flutter<br>✓ Unit test cho RPS engine<br>✓ Cả 2 thành viên hiểu Flame + Riverpod cơ bản</div>
+        </div>
+      </div>
+
+      <div class="section-header">Phase 2 — Alpha (Tuần 5–13): Phong phú & Hấp dẫn hơn</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="padding:10px 12px;border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);border-left:3px solid #185FA5">
+          <div style="font-weight:500;font-size:12px;margin-bottom:4px;color:var(--color-text-primary)">Files bổ sung</div>
+          <div style="font-size:11px;color:var(--color-text-secondary)">character/ (character_select, provider)<br>profile/ (player_stats, profile_hive_repository)<br>shop/ (shop_item, shop_screen, shop_provider)<br>tutorial/ (tutorial_provider, overlay_widget)<br>ai/heuristic_ai · adaptive_ai<br>game/flame/character_component · slapstick_component<br>game/widgets/round_history_widget · wrong_pick_alert<br>shared/storage/adapters/ (settings, stats, shop)<br>assets/animations/*.riv · assets/images/stickers/</div>
+        </div>
+        <div style="padding:10px 12px;border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);border-left:3px solid #185FA5">
+          <div style="font-weight:500;font-size:12px;margin-bottom:4px;color:var(--color-text-primary)">Mục tiêu kiểm chứng</div>
+          <div style="font-size:11px;color:var(--color-text-secondary)">✓ Level 1→10+ với bàn vật phẩm mở rộng<br>✓ Trap/Slapstick effects (giới hạn content safety)<br>✓ AI 3 cấp độ (random → heuristic → adaptive)<br>✓ Meta-progression: tiền, XP, cửa hàng cosmetic<br>✓ Rive animation: idle/win/lose nhân vật dân gian VN<br>✓ flame_audio: SFX + nhạc nền<br>✓ Tutorial tích hợp Level 1-3<br>✓ Alpha playtest ≥5 người ngoài team</div>
+        </div>
+      </div>
+
+      <div class="section-header">Phase 3 — Beta → Release (Tuần 14–19): Backend + PvP</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="padding:10px 12px;border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);border-left:3px solid #BA7517">
+          <div style="font-weight:500;font-size:12px;margin-bottom:4px;color:var(--color-text-primary)">Files bổ sung</div>
+          <div style="font-size:11px;color:var(--color-text-secondary)">auth/ (firebase_auth_service, login_screen)<br>profile/data/profile_remote_repository<br>pvp/ (room, realtime_service, matchmaking, room_screen, pvp_game_screen)<br>rank/ (rank, rank_repository, leaderboard_screen)<br>social/ (share_service, deep_link_service, sticker_service)<br>shared/l10n/app_vi.arb · app_en.arb<br>.github/workflows/ci.yml</div>
+        </div>
+        <div style="padding:10px 12px;border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);border-left:3px solid #BA7517">
+          <div style="font-weight:500;font-size:12px;margin-bottom:4px;color:var(--color-text-primary)">Mục tiêu kiểm chứng</div>
+          <div style="font-size:11px;color:var(--color-text-secondary)">✓ Auth Google/Apple (Firebase/Supabase)<br>✓ PvP realtime: phòng riêng + ghép trận MMR<br>✓ Rank Bronze→Gold + Leaderboard<br>✓ Chia sẻ ảnh kết quả / Deep link mời phòng<br>✓ i18n: VI + EN<br>✓ CI/CD: build APK/IPA tự động<br>✓ Beta playtest ≥10 người<br>✓ Submit Play Store / App Store</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<script>
+function toggle(el) {
+  const li = el.parentElement;
+  li.classList.toggle('collapsed');
+}
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+</script>
